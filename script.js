@@ -18,6 +18,10 @@ const map = new mapboxgl.Map({
           'id': 'water-layer',
           'type': 'line',
           'source': 'water',
+          'layout': {
+            // Make the layer visible by default.
+            'visibility': 'visible'
+            },
           'paint': {
               'line-width': 3,
               'line-color': 'blue'
@@ -34,6 +38,10 @@ const map = new mapboxgl.Map({
           'id': 'vegetation-layer',
           'type': 'line',
           'source': 'vegetation',
+          'layout': {
+            // Make the layer visible by default.
+            'visibility': 'visible'
+            },
           'paint': {
               'line-width': 3,
               'line-color': 'green',
@@ -55,6 +63,60 @@ const map = new mapboxgl.Map({
          
      });
     
+
+
+     map.on('idle', () => {
+        // If these two layers were not added to the map, abort
+        if (!map.getLayer('water-layer') || !map.getLayer('vegetation-layer')) {
+        return;
+        }
+         
+        // Enumerate ids of the layers.
+        const toggleableLayerIds = ['water-layer', 'vegetation-layer'];
+         
+        // Set up the corresponding toggle button for each layer.
+        for (const id of toggleableLayerIds) {
+        // Skip layers that already have a button set up.
+        if (document.getElementById(id)) {
+        continue;
+        }
+         
+        // Create a link.
+        const link = document.createElement('a');
+        link.id = id;
+        link.href = '#';
+        link.textContent = id;
+        link.className = 'active';
+         
+        // Show or hide layer when the toggle is clicked.
+        link.onclick = function (e) {
+        const clickedLayer = this.textContent;
+        e.preventDefault();
+        e.stopPropagation();
+         
+        const visibility = map.getLayoutProperty(
+        clickedLayer,
+        'visibility'
+        );
+         
+        // Toggle layer visibility by changing the layout object's visibility property.
+        if (visibility === 'visible') {
+        map.setLayoutProperty(clickedLayer, 'visibility', 'none');
+        this.className = '';
+        } else {
+        this.className = 'active';
+        map.setLayoutProperty(
+        clickedLayer,
+        'visibility',
+        'visible'
+        );
+        }
+        };
+         
+        const layers = document.getElementById('menu');
+        layers.appendChild(link);
+        }
+        });
      
     // Add a control to adjust view at the top right corner of the page. 
     const navControl = new mapboxgl.NavigationControl({
