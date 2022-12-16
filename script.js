@@ -129,7 +129,7 @@ const map = new mapboxgl.Map({
     const map2 = new mapboxgl.Map({
    
         container: 'map2',
-        style: 'mapbox://styles/mapbox/light-v11',
+        style: 'mapbox://styles/mapbox/dark-v11',
         center: [21.7587, 4.0383], 
         zoom: 2.4, 
         projection: 'equirectangular',
@@ -138,37 +138,21 @@ const map = new mapboxgl.Map({
     
         //load the agro-ecological data file from the data folder
         map2.on('load', () => {
-            map2.addSource('water', {
+            map2.addSource('eco', {
                 type: 'geojson',
                 data: 'data/eco.geojson',
             });
             map2.scrollZoom.disable();
             map2.addLayer({
-              'id': 'water-layer',
+              'id': 'eco-layer',
               'type': 'line',
-              'source': 'water',
+              'source': 'eco',
               'paint': {
                   'line-width': 3,
                   'line-color': 'orange'
               }
             });
-    
-            // load the food GeoJSON data from the data folder.
-            map2.addSource('vegetation', {
-                type: 'geojson',
-                data: 'data/food.json'
-            });
-        
-            map2.addLayer({
-              'id': 'vegetation-layer',
-              'type': 'line',
-              'source': 'vegetation',
-              'paint': {
-                  'line-width': 3,
-                  'line-color': 'green',
-                  'line-opacity': .5
-              }
-            });
+               
         });
     
         
@@ -199,6 +183,49 @@ const map = new mapboxgl.Map({
         });
         map2.addControl(navControl, 'top-right');
   
+        const popup1 = new mapboxgl.Popup({
+            closeButton: true,
+            closeOnClick: true
+        });
+        
+        // Set the coordinates where the popup should appear
+        popup1.setLngLat([21.7587, 4.0383]);
+        
+        // Set the HTML content of the popup
+        popup1.setHTML("<p>Click on any zone for more details</p>");
+        
+        // Add the popup to the map
+        popup1.addTo(map2);
+    
+        map2.on("click", function(e) {
+            // Get the features that are under the user's cursor
+            const features = map2.queryRenderedFeatures(e.point, {
+                layers: ["eco-layer"]
+            });
+        
+            // If there are no features under the cursor, do nothing
+            if (!features.length) {
+                return;
+            }
+        
+            // Get the first feature under the cursor
+            const feature = features[0];
+        
+            // Create a new instance of the Popup class
+            const popup1 = new mapboxgl.Popup({
+                closeButton: true,
+                closeOnClick: true
+            });
+        
+            // Set the coordinates where the popup should appear
+            popup1.setLngLat(e.lngLat);
+        
+            // Set the HTML content of the popup
+            popup1.setHTML(`<h1>${feature.properties.AEZ_NAME}</h1>`);
+        
+            // Add the popup to the map
+            popup1.addTo(map2);
+        });
          
          const map3 = new mapboxgl.Map({
             container: 'map3', 
@@ -256,47 +283,3 @@ const map = new mapboxgl.Map({
                 visualizePitch: true
             });
             map3.addControl(navControl, 'top-right');
-
-            const popup = new mapboxgl.Popup({
-                closeButton: true,
-                closeOnClick: true
-            });
-            
-            // Set the coordinates where the popup should appear
-            popup.setLngLat([21.7587, 4.0383]);
-            
-            // Set the HTML content of the popup
-            popup.setHTML("<h1>Red alert zone</h1><p>This is the red alert zone. It covers parts of Kenya, Uganda, South Sudan and Tanzania</p>");
-            
-            // Add the popup to the map
-            popup.addTo(map3);
-        
-            map3.on("click", function(e) {
-                // Get the features that are under the user's cursor
-                const features = map3.queryRenderedFeatures(e.point, {
-                    layers: ["water-layer"]
-                });
-            
-                // If there are no features under the cursor, do nothing
-                if (!features.length) {
-                    return;
-                }
-            
-                // Get the first feature under the cursor
-                const feature = features[0];
-            
-                // Create a new instance of the Popup class
-                const popup = new mapboxgl.Popup({
-                    closeButton: true,
-                    closeOnClick: true
-                });
-            
-                // Set the coordinates where the popup should appear
-                popup.setLngLat(e.lngLat);
-            
-                // Set the HTML content of the popup
-                popup.setHTML(`<h1>${feature.properties.name}<h1>Red alert zone</h1><p>This is the red alert zone. It covers parts of Kenya, Uganda, South Sudan and Tanzania</p>`);
-            
-                // Add the popup to the map
-                popup.addTo(map3);
-            });
