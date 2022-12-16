@@ -124,6 +124,8 @@ const map = new mapboxgl.Map({
     });
     map.addControl(navControl, 'top-right');
 
+   
+
     const map2 = new mapboxgl.Map({
    
         container: 'map2',
@@ -210,36 +212,21 @@ const map = new mapboxgl.Map({
         
             //load the red alert data file from the data folder
             map3.on('load', () => {
-                map3.addSource('water', {
+                map3.addSource('red', {
                     type: 'geojson',
                     data: 'data/red.geojson',
                 });
                 map3.scrollZoom.disable();
                 map3.addLayer({
-                  'id': 'water-layer',
+                  'id': 'red-layer',
                   'type': 'line',
-                  'source': 'water',
+                  'source': 'red',
                   'paint': {
                       'line-width': 3,
                       'line-color': 'red'
                   }
                 });
         
-                map3.addSource('vegetation', {
-                    type: 'geojson',
-                    data: 'data/red.json'
-                });
-            
-                map3.addLayer({
-                  'id': 'vegetation-layer',
-                  'type': 'line',
-                  'source': 'vegetation',
-                  'paint': {
-                      'line-width': 3,
-                      'line-color': 'green',
-                      'line-opacity': .5
-                  }
-                });
             });
         
             
@@ -269,3 +256,47 @@ const map = new mapboxgl.Map({
                 visualizePitch: true
             });
             map3.addControl(navControl, 'top-right');
+
+            const popup = new mapboxgl.Popup({
+                closeButton: true,
+                closeOnClick: true
+            });
+            
+            // Set the coordinates where the popup should appear
+            popup.setLngLat([21.7587, 4.0383]);
+            
+            // Set the HTML content of the popup
+            popup.setHTML("<h1>Red alert zone</h1><p>This is the red alert zone. It covers parts of Kenya, Uganda, South Sudan and Tanzania</p>");
+            
+            // Add the popup to the map
+            popup.addTo(map3);
+        
+            map3.on("click", function(e) {
+                // Get the features that are under the user's cursor
+                const features = map3.queryRenderedFeatures(e.point, {
+                    layers: ["water-layer"]
+                });
+            
+                // If there are no features under the cursor, do nothing
+                if (!features.length) {
+                    return;
+                }
+            
+                // Get the first feature under the cursor
+                const feature = features[0];
+            
+                // Create a new instance of the Popup class
+                const popup = new mapboxgl.Popup({
+                    closeButton: true,
+                    closeOnClick: true
+                });
+            
+                // Set the coordinates where the popup should appear
+                popup.setLngLat(e.lngLat);
+            
+                // Set the HTML content of the popup
+                popup.setHTML(`<h1>${feature.properties.name}<h1>Red alert zone</h1><p>This is the red alert zone. It covers parts of Kenya, Uganda, South Sudan and Tanzania</p>`);
+            
+                // Add the popup to the map
+                popup.addTo(map3);
+            });
